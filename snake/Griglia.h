@@ -151,9 +151,19 @@ private:
     // (pulizia totale dello schermo) dai successivi aggiornamenti
     // differenziali (solo celle modificate).
 
+	// ── Utilità interne ────────────────────────────────────────
+	// Inizializza tutta la matrice con celle vuote e azzera la maschera di aggiornamento.
+	void inizializzaCelle();
+
 public:
 
     // ── Costruttori / Distruttore ─────────────────────────────
+    // Costruttore di default
+    // Imposta tutti gli attributi ai valori di default ossia (30x30) in popsizione
+    // (10, 10) con bordo biano
+    // Inizializza tutte le celle come vuote, azzera la maschera
+    // cellaModificata e ottiene l'handle della console.
+    Griglia();
 
     // Costruttore principale.
     // Parametri:

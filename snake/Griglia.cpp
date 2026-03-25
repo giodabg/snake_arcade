@@ -18,70 +18,94 @@
 
 // ── Costruttore / Distruttore ────────────────────────────────
 
-Griglia::Griglia(int r, int c, int ox, int oy, bool bordo, WORD colBordo)
+void Griglia::inizializzaCelle()
 {
-    // Clamp delle dimensioni entro i limiti della matrice statica
-    if (r > MAX_RIGHE)
-        righe = MAX_RIGHE;
-    else
-        righe = r;
-
-    if (c > MAX_COLONNE)
-        colonne = MAX_COLONNE;
-    else
-        colonne = c;
-
-    origineX = ox;
-    origineY = oy;
-    bordoAbilitato = bordo;
-    coloreBordo = colBordo;
-    primoRender = true;
-
-    // Ottiene l'handle della console e salva lo stato originale
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    GetConsoleScreenBufferInfo(hConsole, &infoConsole);
-
-    // Inizializza tutte le celle con posizione e stato vuoto
     int i = 0;
-    while (i < righe)
+    while (i < this->righe)
     {
         int j = 0;
-        while (j < colonne)
+        while (j < this->colonne)
         {
-            celle[i][j].impostaPosizione(i, j);
-            celle[i][j].svuota();
-            cellaModificata[i][j] = false;
+            this->celle[i][j].impostaPosizione(i, j);
+            this->celle[i][j].svuota();
+            this->cellaModificata[i][j] = false;
             j = j + 1;
         }
         i = i + 1;
     }
 }
 
+Griglia::Griglia()
+{
+    this->righe = 30;
+    this->colonne = 30;
+
+    this->origineX = 10;
+    this->origineY = 10;
+    this->bordoAbilitato = true;
+    this->coloreBordo = FG_BIANCO;
+    this->primoRender = true;
+
+    // Ottiene l'handle della console e salva lo stato originale
+    this->hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleScreenBufferInfo(this->hConsole, &this->infoConsole);
+
+    // Inizializza tutte le this->celle con posizione e stato vuoto
+    inizializzaCelle();
+}
+
+Griglia::Griglia(int r, int c, int ox, int oy, bool bordo, WORD colBordo)
+{
+    // Clamp delle dimensioni entro i limiti della matrice statica
+    if (r > MAX_RIGHE)
+        this->righe = MAX_RIGHE;
+    else
+        this->righe = r;
+
+    if (c > MAX_COLONNE)
+        this->colonne = MAX_COLONNE;
+    else
+        this->colonne = c;
+
+    this->origineX = ox;
+    this->origineY = oy;
+    this->bordoAbilitato = bordo;
+    this->coloreBordo = colBordo;
+    this->primoRender = true;
+
+    // Ottiene l'handle della console e salva lo stato originale
+    this->hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    GetConsoleScreenBufferInfo(this->hConsole, &this->infoConsole);
+
+    // Inizializza tutte le this->celle con posizione e stato vuoto
+    inizializzaCelle();
+}
+
 Griglia::~Griglia()
 {
     // Ripristina il colore e la visibilità originali del cursore
-    SetConsoleTextAttribute(hConsole, infoConsole.wAttributes);
+    SetConsoleTextAttribute(this->hConsole, this->infoConsole.wAttributes);
     mostraCursore();
 }
 
 
-// ── Accesso alle celle ────────────────────────────────────────
+// ── Accesso alle this->celle ────────────────────────────────────────
 
 Cella& Griglia::getCella(int r, int c)
 {
-    return celle[r][c];
+    return this->celle[r][c];
 }
 
 void Griglia::impostaCella(int r, int c, char forma, WORD cp, WORD cs)
 {
-    celle[r][c].impostaContenuto(forma, cp, cs);
-    cellaModificata[r][c] = true;
+    this->celle[r][c].impostaContenuto(forma, cp, cs);
+    this->cellaModificata[r][c] = true;
 }
 
 void Griglia::svuotaCella(int r, int c)
 {
-    celle[r][c].svuota();
-    cellaModificata[r][c] = true;
+    this->celle[r][c].svuota();
+    this->cellaModificata[r][c] = true;
 }
 
 
@@ -90,13 +114,13 @@ void Griglia::svuotaCella(int r, int c)
 void Griglia::svuotaTutto()
 {
     int i = 0;
-    while (i < righe)
+    while (i < this->righe)
     {
         int j = 0;
-        while (j < colonne)
+        while (j < this->colonne)
         {
-            celle[i][j].svuota();
-            cellaModificata[i][j] = false;
+            this->celle[i][j].svuota();
+            this->cellaModificata[i][j] = false;
             j = j + 1;
         }
         i = i + 1;
@@ -106,13 +130,13 @@ void Griglia::svuotaTutto()
 void Griglia::riempiTutto(char forma, WORD cp, WORD cs)
 {
     int i = 0;
-    while (i < righe)
+    while (i < this->righe)
     {
         int j = 0;
-        while (j < colonne)
+        while (j < this->colonne)
         {
-            celle[i][j].impostaContenuto(forma, cp, cs);
-            cellaModificata[i][j] = true;
+            this->celle[i][j].impostaContenuto(forma, cp, cs);
+            this->cellaModificata[i][j] = true;
             j = j + 1;
         }
         i = i + 1;
@@ -124,25 +148,25 @@ void Griglia::riempiTutto(char forma, WORD cp, WORD cs)
 
 void Griglia::renderCompleto()
 {
-    if (primoRender == true)
+    if (this->primoRender == true)
     {
         pulisciSchermo();
         nascondiCursore();
-        primoRender = false;
+        this->primoRender = false;
     }
 
-    if (bordoAbilitato == true)
+    if (this->bordoAbilitato == true)
         disegnaBordo();
 
     int i = 0;
-    while (i < righe)
+    while (i < this->righe)
     {
         int j = 0;
-        while (j < colonne)
+        while (j < this->colonne)
         {
             posizionaCursore(i, j);
-            celle[i][j].visualizza(hConsole);
-            cellaModificata[i][j] = false;
+            this->celle[i][j].visualizza(this->hConsole);
+            this->cellaModificata[i][j] = false;
             j = j + 1;
         }
         i = i + 1;
@@ -151,7 +175,7 @@ void Griglia::renderCompleto()
 
 void Griglia::renderDifferenziale()
 {
-    if (primoRender == true)
+    if (this->primoRender == true)
     {
         // Al primo ciclo forza sempre un render completo
         renderCompleto();
@@ -159,16 +183,16 @@ void Griglia::renderDifferenziale()
     else
     {
         int i = 0;
-        while (i < righe)
+        while (i < this->righe)
         {
             int j = 0;
-            while (j < colonne)
+            while (j < this->colonne)
             {
-                if (cellaModificata[i][j] == true)
+                if (this->cellaModificata[i][j] == true)
                 {
                     posizionaCursore(i, j);
-                    celle[i][j].visualizza(hConsole);
-                    cellaModificata[i][j] = false;
+                    this->celle[i][j].visualizza(this->hConsole);
+                    this->cellaModificata[i][j] = false;
                 }
                 j = j + 1;
             }
@@ -180,19 +204,19 @@ void Griglia::renderDifferenziale()
 void Griglia::disegnaBordo()
 {
     // Offset di bordo: il bordo occupa la colonna/riga immediatamente
-    // esterna alla griglia, quindi si disegna a origineX-1, origineY-1.
+    // esterna alla griglia, quindi si disegna a this->origineX-1, this->origineY-1.
     COORD pos;
     int   offset = 1;   // larghezza del bordo in caratteri
 
-    SetConsoleTextAttribute(hConsole, coloreBordo);
+    SetConsoleTextAttribute(this->hConsole, this->coloreBordo);
 
     // ── Riga superiore: ╔═══...═══╗ ─────────────────────────
-    pos.X = (short)(origineX - offset);
-    pos.Y = (short)(origineY - offset);
-    SetConsoleCursorPosition(hConsole, pos);
+    pos.X = (short)(this->origineX - offset);
+    pos.Y = (short)(this->origineY - offset);
+    SetConsoleCursorPosition(this->hConsole, pos);
     cout << BORDO_ANGOLO_ALTO_SX;
 
-    for (int j = 0; j < colonne + offset + 1; j++)
+    for (int j = 0; j < this->colonne + offset + 1; j++)
     {
         cout << BORDO_ORIZZONTALE;
     }
@@ -201,30 +225,30 @@ void Griglia::disegnaBordo()
 
     // ── Righe laterali: ║ ... ║ ──────────────────────────────
     int i = 0;
-    while (i < righe+offset)
+    while (i < this->righe+offset)
     {
         // Bordo sinistro
-        pos.X = (short)(origineX - offset);
-        pos.Y = (short)(origineY + i);
-        SetConsoleCursorPosition(hConsole, pos);
+        pos.X = (short)(this->origineX - offset);
+        pos.Y = (short)(this->origineY + i);
+        SetConsoleCursorPosition(this->hConsole, pos);
         cout << BORDO_VERTICALE;
 
         // Bordo destro
-        pos.X = (short)(origineX + colonne + offset + 1);
-        pos.Y = (short)(origineY + i);
-        SetConsoleCursorPosition(hConsole, pos);
+        pos.X = (short)(this->origineX + this->colonne + offset + 1);
+        pos.Y = (short)(this->origineY + i);
+        SetConsoleCursorPosition(this->hConsole, pos);
         cout << BORDO_VERTICALE;
 
         i = i + 1;
     }
 
     // ── Riga inferiore: ╚═══...═══╝ ─────────────────────────
-    pos.X = (short)(origineX - offset);
-    pos.Y = (short)(origineY + righe + offset);
-    SetConsoleCursorPosition(hConsole, pos);
+    pos.X = (short)(this->origineX - offset);
+    pos.Y = (short)(this->origineY + this->righe + offset);
+    SetConsoleCursorPosition(this->hConsole, pos);
     cout << BORDO_ANGOLO_BASSO_SX;
 
-    for (int j = 0; j < colonne + offset + 1; j++)
+    for (int j = 0; j < this->colonne + offset + 1; j++)
     {
         cout << BORDO_ORIZZONTALE;
     }
@@ -232,7 +256,7 @@ void Griglia::disegnaBordo()
     cout << BORDO_ANGOLO_BASSO_DX;
 
     // Ripristina il colore di default al termine del bordo
-    SetConsoleTextAttribute(hConsole, COLORE_DEFAULT);
+    SetConsoleTextAttribute(this->hConsole, COLORE_DEFAULT);
 }
 
 
@@ -240,38 +264,38 @@ void Griglia::disegnaBordo()
 
 void Griglia::posizionaCursore(int r, int c)
 {
-    // Se il bordo è abilitato, la griglia parte da origineX+1, origineY+1
+    // Se il bordo è abilitato, la griglia parte da this->origineX+1, this->origineY+1
     // per lasciare spazio ai caratteri del bordo esterno.
     COORD pos;
 
-    if (bordoAbilitato == true)
+    if (this->bordoAbilitato == true)
     {
-        pos.X = (short)(origineX + c + 1);
-        pos.Y = (short)(origineY + r + 1);
+        pos.X = (short)(this->origineX + c + 1);
+        pos.Y = (short)(this->origineY + r + 1);
     }
     else
     {
-        pos.X = (short)(origineX + c);
-        pos.Y = (short)(origineY + r);
+        pos.X = (short)(this->origineX + c);
+        pos.Y = (short)(this->origineY + r);
     }
 
-    SetConsoleCursorPosition(hConsole, pos);
+    SetConsoleCursorPosition(this->hConsole, pos);
 }
 
 void Griglia::nascondiCursore()
 {
     CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hConsole, &cursorInfo);
+    GetConsoleCursorInfo(this->hConsole, &cursorInfo);
     cursorInfo.bVisible = FALSE;
-    SetConsoleCursorInfo(hConsole, &cursorInfo);
+    SetConsoleCursorInfo(this->hConsole, &cursorInfo);
 }
 
 void Griglia::mostraCursore()
 {
     CONSOLE_CURSOR_INFO cursorInfo;
-    GetConsoleCursorInfo(hConsole, &cursorInfo);
+    GetConsoleCursorInfo(this->hConsole, &cursorInfo);
     cursorInfo.bVisible = TRUE;
-    SetConsoleCursorInfo(hConsole, &cursorInfo);
+    SetConsoleCursorInfo(this->hConsole, &cursorInfo);
 }
 
 void Griglia::pulisciSchermo()
@@ -282,19 +306,19 @@ void Griglia::pulisciSchermo()
     DWORD                      scritte;
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
+    GetConsoleScreenBufferInfo(this->hConsole, &csbi);
     DWORD dimensioneBuffer = csbi.dwSize.X * csbi.dwSize.Y;
 
     // Riempie l'intero buffer di spazi
-    FillConsoleOutputCharacter(hConsole, ' ',
+    FillConsoleOutputCharacter(this->hConsole, ' ',
         dimensioneBuffer, coordHome, &scritte);
 
     // Applica il colore di default a tutto il buffer
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes,
+    FillConsoleOutputAttribute(this->hConsole, csbi.wAttributes,
         dimensioneBuffer, coordHome, &scritte);
 
     // Riporta il cursore in alto a sinistra
-    SetConsoleCursorPosition(hConsole, coordHome);
+    SetConsoleCursorPosition(this->hConsole, coordHome);
 }
 
 
@@ -302,12 +326,12 @@ void Griglia::pulisciSchermo()
 
 int Griglia::getRighe()
 {
-    return righe;
+    return this->righe;
 }
 
 int Griglia::getColonne()
 {
-    return colonne;
+    return this->colonne;
 }
 
 bool Griglia::isInterna(int r, int c)
@@ -316,8 +340,8 @@ bool Griglia::isInterna(int r, int c)
     // nei limiti effettivi della griglia corrente.
     // I componenti di gioco chiamano questo metodo prima di
     // accedere a getCella() per evitare accessi fuori matrice.
-    bool rigaValida = (r >= 0) && (r < righe);
-    bool colonnaValida = (c >= 0) && (c < colonne);
+    bool rigaValida = (r >= 0) && (r < this->righe);
+    bool colonnaValida = (c >= 0) && (c < this->colonne);
 
     return rigaValida && colonnaValida;
 }

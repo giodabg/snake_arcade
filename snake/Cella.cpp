@@ -14,22 +14,22 @@ using namespace std;
 
 Cella::Cella()
 {
-    forma = ' ';
-    colorePrimeroPiano = COLORE_DEFAULT;
-    coloreSfondo = SFONDO_DEFAULT;
-    visibile = true;
-    riga = 0;
-    colonna = 0;
+    this->forma = ' ';
+    this->colorePrimeroPiano = COLORE_DEFAULT;
+    this->coloreSfondo = SFONDO_DEFAULT;
+    this->visibile = true;
+    this->riga = 0;
+    this->colonna = 0;
 }
 
 Cella::Cella(int r, int c, char f, WORD cp, WORD cs, bool vis)
 {
-    riga = r;
-    colonna = c;
-    forma = f;
-    colorePrimeroPiano = cp;
-    coloreSfondo = cs;
-    visibile = vis;
+    this->riga = r;
+    this->colonna = c;
+    this->forma = f;
+    this->colorePrimeroPiano = cp;
+    this->coloreSfondo = cs;
+    this->visibile = vis;
 }
 
 
@@ -37,39 +37,39 @@ Cella::Cella(int r, int c, char f, WORD cp, WORD cs, bool vis)
 
 void Cella::impostaContenuto(char f, WORD cp, WORD cs)
 {
-    forma = f;
-    colorePrimeroPiano = cp;
-    coloreSfondo = cs;
+    this->forma = f;
+    this->colorePrimeroPiano = cp;
+    this->coloreSfondo = cs;
 }
 
 void Cella::impostaForma(char f)
 {
-    forma = f;
+    this->forma = f;
 }
 
 void Cella::impostaColori(WORD cp, WORD cs)
 {
-    colorePrimeroPiano = cp;
-    coloreSfondo = cs;
+    this->colorePrimeroPiano = cp;
+    this->coloreSfondo = cs;
 }
 
 void Cella::impostaVisibilita(bool vis)
 {
-    visibile = vis;
+    this->visibile = vis;
 }
 
 void Cella::impostaPosizione(int r, int c)
 {
-    riga = r;
-    colonna = c;
+    this->riga = r;
+    this->colonna = c;
 }
 
 void Cella::svuota()
 {
-    forma = ' ';
-    colorePrimeroPiano = COLORE_DEFAULT;
-    coloreSfondo = SFONDO_DEFAULT;
-    visibile = true;
+    this->forma = ' ';
+    this->colorePrimeroPiano = COLORE_DEFAULT;
+    this->coloreSfondo = SFONDO_DEFAULT;
+    this->visibile = true;
 }
 
 
@@ -77,7 +77,7 @@ void Cella::svuota()
 
 char Cella::getForma()
 {
-    return forma;
+    return this->forma;
 }
 
 WORD Cella::getAttributoColore()
@@ -85,22 +85,22 @@ WORD Cella::getAttributoColore()
     // Combina i due attributi WinAPI in un unico WORD a 16 bit:
     // i 4 bit bassi codificano il colore del carattere,
     // i 4 bit alti codificano il colore di sfondo.
-    return colorePrimeroPiano | coloreSfondo;
+    return this->colorePrimeroPiano | this->coloreSfondo;
 }
 
 bool Cella::isVisibile()
 {
-    return visibile;
+    return this->visibile;
 }
 
 int Cella::getRiga()
 {
-    return riga;
+    return this->riga;
 }
 
 int Cella::getColonna()
 {
-    return colonna;
+    return this->colonna;
 }
 
 
@@ -108,9 +108,9 @@ int Cella::getColonna()
 
 void Cella::visualizza(HANDLE hConsole)
 {
-    // Se la cella non è visibile si stampa uno spazio
+    // Se la cella non è this->visibile si stampa uno spazio
     // con i colori di default senza alterare il contesto grafico.
-    if (visibile == false)
+    if (this->visibile == false)
     {
         SetConsoleTextAttribute(hConsole, COLORE_DEFAULT);
         cout << ' ';
@@ -118,7 +118,7 @@ void Cella::visualizza(HANDLE hConsole)
     else
     {
         SetConsoleTextAttribute(hConsole, getAttributoColore());
-        cout << forma;
+        cout << this->forma;
     }
 
     // Ripristina il colore di default dopo ogni cella per non
