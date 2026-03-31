@@ -47,7 +47,6 @@ Griglia creaGriglia(int numRig, int numCol)
 	return g;
 }
 
-// 
 // ============================================================
 //  Funzione: calcolaCentroStringa
 //  Restituisce la colonna di inizio affinché la stringa risulti
@@ -80,10 +79,11 @@ void scriviAlCentro(Griglia& g, string msg, WORD cp, WORD cs)
 
 }
 
+// ============================================================
 // Funzione: attendiTasto
 // Visualizza sullo schermo il messaggio "Premi un tasto per uscire ..."
 // e termina quando l'utente preme un tasto seguito da INVIO
-// 
+// ============================================================
 void attendiTasto() {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD  posCursore;
