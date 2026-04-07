@@ -203,20 +203,3 @@ int mainSnake()
 
     return 0;
 }
-
-
-int main()
-{
-    int ris;
-
-	char scelta;
-	cout << "Scegli il test da eseguire (A = Asterisco, S = Snake): ";
-	cin >> scelta;
-    // Consuma l'eventuale carattere si invio residuo nel buffer
-    cin.ignore(100, '\n');
-    if (scelta == 'A' || scelta == 'a')
-        ris = mainGriglia();
-	else if (scelta == 'S' || scelta == 's')
-        ris = mainSnake();
-    return ris;
-}
