@@ -21,10 +21,10 @@
 void Griglia::inizializzaCelle()
 {
     int i = 0;
-    while (i < this->righe)
+    while (i < this->numRighe)
     {
         int j = 0;
-        while (j < this->colonne)
+        while (j < this->numColonne)
         {
             this->celle[i][j].impostaPosizione(i, j);
             this->celle[i][j].svuota();
@@ -37,8 +37,8 @@ void Griglia::inizializzaCelle()
 
 Griglia::Griglia()
 {
-    this->righe = 30;
-    this->colonne = 30;
+    this->numRighe = 30;
+    this->numColonne = 30;
 
     this->origineX = 10;
     this->origineY = 10;
@@ -58,14 +58,14 @@ Griglia::Griglia(int r, int c, int ox, int oy, bool bordo, WORD colBordo)
 {
     // Clamp delle dimensioni entro i limiti della matrice statica
     if (r > MAX_RIGHE)
-        this->righe = MAX_RIGHE;
+        this->numRighe = MAX_RIGHE;
     else
-        this->righe = r;
+        this->numRighe = r;
 
     if (c > MAX_COLONNE)
-        this->colonne = MAX_COLONNE;
+        this->numColonne = MAX_COLONNE;
     else
-        this->colonne = c;
+        this->numColonne = c;
 
     this->origineX = ox;
     this->origineY = oy;
@@ -93,17 +93,35 @@ Griglia::~Griglia()
 
 Cella& Griglia::getCella(int r, int c)
 {
+    if (!isInterna(r, c))
+    {
+        // Accesso fuori dai limiti: comportamento non definito.
+        // Per sicurezza, restituisce un riferimento alla cella (0,0).
+        return this->celle[0][0];
+	}
     return this->celle[r][c];
 }
 
 void Griglia::impostaCella(int r, int c, char forma, WORD cp, WORD cs)
 {
+    if (!isInterna(r, c))
+    {
+        // Accesso fuori dai limiti: comportamento non definito.
+        // Per sicurezza, non fa nulla.
+        return;
+    }
     this->celle[r][c].impostaContenuto(forma, cp, cs);
     this->cellaModificata[r][c] = true;
 }
 
 void Griglia::svuotaCella(int r, int c)
 {
+    if (!isInterna(r, c))
+    {
+        // Accesso fuori dai limiti: comportamento non definito.
+        // Per sicurezza, non fa nulla.
+        return;
+	}
     this->celle[r][c].svuota();
     this->cellaModificata[r][c] = true;
 }
@@ -114,10 +132,10 @@ void Griglia::svuotaCella(int r, int c)
 void Griglia::svuotaTutto()
 {
     int i = 0;
-    while (i < this->righe)
+    while (i < this->numRighe)
     {
         int j = 0;
-        while (j < this->colonne)
+        while (j < this->numColonne)
         {
             this->celle[i][j].svuota();
             this->cellaModificata[i][j] = false;
@@ -130,10 +148,10 @@ void Griglia::svuotaTutto()
 void Griglia::riempiTutto(char forma, WORD cp, WORD cs)
 {
     int i = 0;
-    while (i < this->righe)
+    while (i < this->numRighe)
     {
         int j = 0;
-        while (j < this->colonne)
+        while (j < this->numColonne)
         {
             this->celle[i][j].impostaContenuto(forma, cp, cs);
             this->cellaModificata[i][j] = true;
@@ -159,10 +177,10 @@ void Griglia::renderCompleto()
         disegnaBordo();
 
     int i = 0;
-    while (i < this->righe)
+    while (i < this->numRighe)
     {
         int j = 0;
-        while (j < this->colonne)
+        while (j < this->numColonne)
         {
             posizionaCursore(i, j);
             this->celle[i][j].visualizza(this->hConsole);
@@ -183,10 +201,10 @@ void Griglia::renderDifferenziale()
     else
     {
         int i = 0;
-        while (i < this->righe)
+        while (i < this->numRighe)
         {
             int j = 0;
-            while (j < this->colonne)
+            while (j < this->numColonne)
             {
                 if (this->cellaModificata[i][j] == true)
                 {
@@ -216,7 +234,7 @@ void Griglia::disegnaBordo()
     SetConsoleCursorPosition(this->hConsole, pos);
     cout << BORDO_ANGOLO_ALTO_SX;
 
-    for (int j = 0; j < this->colonne + offset + 1; j++)
+    for (int j = 0; j < this->numColonne + offset + 1; j++)
     {
         cout << BORDO_ORIZZONTALE;
     }
@@ -225,7 +243,7 @@ void Griglia::disegnaBordo()
 
     // ── Righe laterali: ║ ... ║ ──────────────────────────────
     int i = 0;
-    while (i < this->righe+offset)
+    while (i < this->numRighe+offset)
     {
         // Bordo sinistro
         pos.X = (short)(this->origineX - offset);
@@ -234,7 +252,7 @@ void Griglia::disegnaBordo()
         cout << BORDO_VERTICALE;
 
         // Bordo destro
-        pos.X = (short)(this->origineX + this->colonne + offset + 1);
+        pos.X = (short)(this->origineX + this->numColonne + offset + 1);
         pos.Y = (short)(this->origineY + i);
         SetConsoleCursorPosition(this->hConsole, pos);
         cout << BORDO_VERTICALE;
@@ -244,11 +262,11 @@ void Griglia::disegnaBordo()
 
     // ── Riga inferiore: ╚═══...═══╝ ─────────────────────────
     pos.X = (short)(this->origineX - offset);
-    pos.Y = (short)(this->origineY + this->righe + offset);
+    pos.Y = (short)(this->origineY + this->numRighe + offset);
     SetConsoleCursorPosition(this->hConsole, pos);
     cout << BORDO_ANGOLO_BASSO_SX;
 
-    for (int j = 0; j < this->colonne + offset + 1; j++)
+    for (int j = 0; j < this->numColonne + offset + 1; j++)
     {
         cout << BORDO_ORIZZONTALE;
     }
@@ -264,6 +282,15 @@ void Griglia::disegnaBordo()
 
 void Griglia::posizionaCursore(int r, int c)
 {
+    if (!isInterna(r, c))
+    {
+        // Accesso fuori dai limiti: comportamento non definito.
+        // Per sicurezza, posiziona il cursore in alto a sinistra.
+        COORD pos = { 0, 0 };
+        SetConsoleCursorPosition(this->hConsole, pos);
+        return;
+	}
+
     // Se il bordo è abilitato, la griglia parte da this->origineX+1, this->origineY+1
     // per lasciare spazio ai caratteri del bordo esterno.
     COORD pos;
@@ -326,22 +353,22 @@ void Griglia::pulisciSchermo()
 
 int Griglia::getRighe()
 {
-    return this->righe;
+    return this->numRighe;
 }
 
 int Griglia::getColonne()
 {
-    return this->colonne;
+    return this->numColonne;
 }
 
 bool Griglia::isInterna(int r, int c)
 {
     // Restituisce true solo se entrambe le coordinate rientrano
     // nei limiti effettivi della griglia corrente.
-    // I componenti di gioco chiamano questo metodo prima di
-    // accedere a getCella() per evitare accessi fuori matrice.
-    bool rigaValida = (r >= 0) && (r < this->righe);
-    bool colonnaValida = (c >= 0) && (c < this->colonne);
+    // I componenti di gioco dovrebbero chiamare questo metodo prima di
+    // accedere a alle celle per evitare accessi fuori matrice.
+    bool rigaValida = (r >= 0) && (r < this->numRighe);
+    bool colonnaValida = (c >= 0) && (c < this->numColonne);
 
     return rigaValida && colonnaValida;
 }

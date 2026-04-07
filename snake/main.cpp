@@ -1,8 +1,11 @@
 ﻿#include <iostream>
 #include <string>
+#include <stdlib.h>       // atoi
 #include <windows.h>
 #include "Griglia.h"
 #include "Cella.h"
+#include "Tastiera.h"
+#include "Snake.h"
 
 using namespace std;
 
@@ -17,7 +20,7 @@ const int ORIGINE_Y = 2;
 const char SIMBOLO_ASTERISCO = '*';
 const char SIMBOLO_VUOTO = ' ';
 
-const int VELOCITA_MS = 100;   // millisecondi tra un frame e il successivo
+const int RITARDO_MS = 50;   // millisecondi tra un frame e il successivo
 
 // Funzione: creaGriglia
 // Crea una griglia con bordo e sfondo blu, pronta per essere usata
@@ -47,17 +50,6 @@ Griglia creaGriglia(int numRig, int numCol)
 	return g;
 }
 
-// 
-// ============================================================
-//  Funzione: calcolaCentroStringa
-//  Restituisce la colonna di inizio affinché la stringa risulti
-//  centrata rispetto alle colonne totali della griglia.
-// ============================================================
-int calcolaCentroStringa(int colonneGriglia, int lunghezzaTesto)
-{
-    return (colonneGriglia - lunghezzaTesto) / 2;
-}
-
 // ============================================================
 //  Funzione: scriviAlCentro
 //  Visualizza al centro dello schermo il messaggio presente nel parametro.
@@ -71,40 +63,23 @@ void scriviAlCentro(Griglia& g, string msg, WORD cp, WORD cs)
     // Lunghezza della stringa
     int lunghezza = msg.length();
 
-    int colMsg = calcolaCentroStringa(NUM_COLONNE, lunghezza);
+    // calcola la colonna di inizio affinché la stringa risulti
+    //  centrata rispetto alle colonne totali della griglia
+    int colMsg = (NUM_COLONNE - lunghezza) / 2;
 
     // Visualizzazione del testo
-    g.scriviStringa(rigaMsg, colMsg,
-        msg, FG_BIANCO, BG_BLU_I);
+    g.scriviStringa(rigaMsg, colMsg, msg, FG_BIANCO, BG_BLU_I);
     g.renderDifferenziale();
-
-}
-
-// Funzione: attendiTasto
-// Visualizza sullo schermo il messaggio "Premi un tasto per uscire ..."
-// e termina quando l'utente preme un tasto seguito da INVIO
-// 
-void attendiTasto() {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD  posCursore;
-    posCursore.X = ORIGINE_X;
-    posCursore.Y = ORIGINE_Y + NUM_RIGHE + 3;
-    SetConsoleCursorPosition(hConsole, posCursore);
-
-    SetConsoleTextAttribute(hConsole,
-        FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-    cout << "  Premi un tasto per uscire..." << endl;
-
-    // Consuma l'eventuale invio residuo nel buffer
-    cin.sync();
-    cin.get();
 }
 
 // ============================================================
-//  main
+// main prova Griglia: sposta un asterisco da sinistra a destra finché esce dallo schermo,
+// poi mostra "GAME OVER" al centro e attende un tasto prima di uscire
 // ============================================================
-int main()
+int mainGriglia()
 {
+    Tastiera tastiera;
+
 	// creazione griglia con impostazioni iniziali
     Griglia griglia = creaGriglia(NUM_RIGHE, NUM_COLONNE);
 
@@ -125,7 +100,7 @@ int main()
         griglia.renderDifferenziale();
 
         // Pausa per rendere visibile il movimento
-        Sleep(VELOCITA_MS);
+        Sleep(RITARDO_MS);
 
         // Cancella la cella corrente (sfondo blu, spazio)
         griglia.impostaCella(rigaAsterisco, colonnaAsterisco,
@@ -145,7 +120,103 @@ int main()
 	scriviAlCentro(griglia, "GAME OVER", FG_BIANCO, BG_BLU_I);
 
     // ── Attende pressione di un tasto prima di uscire ─────────────────────
-    attendiTasto();
+    tastiera.leggiBloccante();
 
     return 0;
+}
+
+int mainSnake()
+{
+    Tastiera tastiera;
+
+    // creazione griglia con impostazioni iniziali
+    Griglia griglia = creaGriglia(NUM_RIGHE, NUM_COLONNE);
+
+    // Lettura nome — stringa libera
+    char nome[MAX_LUNGHEZZA_TESTO];
+    tastiera.leggiStringa(griglia, "Come ti chiami?", nome, BG_BLU_I);
+
+    // Lettura velocità — intero con default 50 e range [50, 100]
+    int ritardo = tastiera.leggiInt(griglia,
+        "Tempo in mill. tra due frame (50-200):",
+        50,
+        50, 200,
+        BG_BLU_I);
+
+    // se il ritardo è troppo piccolo, si imposta al minimo per evitare che il gioco sia ingiocabile
+    if (ritardo < RITARDO_MS)
+        ritardo = RITARDO_MS;
+    
+    // Pulizia della griglia prima di iniziare la partita
+    griglia.riempiTutto(' ', FG_BIANCO, BG_BLU_I);
+    griglia.renderCompleto();
+
+
+    // ── Posizione iniziale: centro della griglia ──────────────
+    int rigaSnake = NUM_RIGHE / 2;
+    int colonnaSnake = NUM_COLONNE / 2;
+    // Snake al centro, angolo 90°, velocità 0.4 misurata in celle/frame
+    Snake snake(colonnaSnake, rigaSnake, 0.4f, 90.0f,
+        '@', FG_GIALLO, BG_BLU_I);
+
+    // ── Game loop: sposta lo snake ─────────────
+    bool partitaInCorso = true;
+    while (partitaInCorso == true)
+    {
+        // ── mostra nome giocatore e velocità ────────────────
+        griglia.scriviStringa(2, 2, nome, FG_BIANCO, BG_BLU_I);
+        griglia.scriviStringa(3, 2, to_string(ritardo), FG_BIANCO, BG_BLU_I);
+        griglia.renderDifferenziale();
+
+		// Aggiorna la posizione dello snake in base alla sua velocità e direzione
+		// usando la griglia per verificare collisioni e limiti
+        snake.muovi(griglia);
+
+		// Disegna lo snake nella nuova posizione
+        snake.disegna(griglia, BG_BLU_I);
+        griglia.renderDifferenziale();
+
+        // Pausa per rendere visibile il movimento
+        Sleep(ritardo);
+
+		int tasto = tastiera.leggi(); // lettura non bloccante: restituisce -1 se non c'è tasto in attesa
+        if (tastiera.isFreccia(tasto) == true)
+        {
+            if (tastiera.uguale(TASTO_SU))  
+                snake.impostaAngolo(270);
+            if (tastiera.uguale(TASTO_GIU))
+                snake.impostaAngolo(90);
+            if (tastiera.uguale(TASTO_SINISTRA))
+                snake.impostaAngolo(180);
+            if (tastiera.uguale(TASTO_DESTRA))
+                snake.impostaAngolo(0);
+        }
+        if (tastiera.uguale(TASTO_ESC))
+            partitaInCorso = false;
+    }
+
+    // ── Fine del gioco: mostra GAME OVER ────────────────
+    scriviAlCentro(griglia, "GAME OVER", FG_BIANCO, BG_BLU_I);
+
+    // ── Attende pressione di un tasto prima di uscire ─────────────────────
+    tastiera.leggiBloccante();
+
+    return 0;
+}
+
+
+int main()
+{
+    int ris;
+
+	char scelta;
+	cout << "Scegli il test da eseguire (A = Asterisco, S = Snake): ";
+	cin >> scelta;
+    // Consuma l'eventuale carattere si invio residuo nel buffer
+    cin.ignore(100, '\n');
+    if (scelta == 'A' || scelta == 'a')
+        ris = mainGriglia();
+	else if (scelta == 'S' || scelta == 's')
+        ris = mainSnake();
+    return ris;
 }

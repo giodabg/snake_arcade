@@ -127,11 +127,13 @@
     <ClCompile Include="Griglia.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Snake.cpp" />
+    <ClCompile Include="Tastiera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Cella.h" />
     <ClInclude Include="Griglia.h" />
     <ClInclude Include="Snake.h" />
+    <ClInclude Include="Tastiera.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

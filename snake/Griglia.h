@@ -93,11 +93,11 @@ private:
 
     // ── Dimensioni effettive ──────────────────────────────────
 
-    int righe;
+    int numRighe;
     // Numero di righe effettivamente usate dalla partita corrente.
     // Deve essere <= MAX_RIGHE.
 
-    int colonne;
+    int numColonne;
     // Numero di colonne effettivamente usate dalla partita corrente.
     // Deve essere <= MAX_COLONNE.
 
@@ -159,8 +159,8 @@ public:
 
     // ── Costruttori / Distruttore ─────────────────────────────
     // Costruttore di default
-    // Imposta tutti gli attributi ai valori di default ossia (30x30) in popsizione
-    // (10, 10) con bordo biano
+    // Imposta tutti gli attributi ai valori di default ossia (30x30) in posizione
+    // (10, 10) con bordo bianco
     // Inizializza tutte le celle come vuote, azzera la maschera
     // cellaModificata e ottiene l'handle della console.
     Griglia();
